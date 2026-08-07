@@ -1,0 +1,297 @@
+// Prisma schema - Software de gestao para empresa de cuidados de enfermagem domiciliaria
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  ENFERMEIRO
+}
+
+enum VisitStatus {
+  AGENDADA
+  CONCLUIDA
+  CANCELADA
+  FALTA
+}
+
+enum InvoiceStatus {
+  PENDENTE
+  PAGA
+  VENCIDA
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role
+  phone        String?
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  visits Visit[] @relation("NurseVisits")
+
+  @@map("users")
+}
+
+model Patient {
+  id               String    @id @default(cuid())
+  name             String
+  birthDate        DateTime?
+  address          String?
+  phone            String?
+  emergencyContact String?
+  nationalId       String?
+  notes            String?
+  active           Boolean   @default(true)
+  createdAt        DateTime  @default(now())
+
+  // Dados clínicos
+  primaryDoctor     String?
+  allergies         String?
+  currentMedication String?
+  medicalConditions String?
+
+  // Cuidador / família
+  caregiverName         String?
+  caregiverPhone        String?
+  caregiverRelationship String?
+
+  // Dados de faturação (se diferentes do utente)
+  billingName    String?
+  billingNif     String?
+  billingAddress String?
+
+  visits   Visit[]
+  invoices Invoice[]
+
+  @@map("patients")
+}
+
+model Visit {
+  id            String      @id @default(cuid())
+  patientId     String
+  nurseId       String?
+  scheduledDate DateTime
+  status        VisitStatus @default(AGENDADA)
+  notes         String?
+  createdAt     DateTime    @default(now())
+
+  patient             Patient                     @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  nurse               User?                       @relation("NurseVisits", fields: [nurseId], references: [id], onDelete: SetNull)
+  record              VisitRecord?
+  interventions       VisitIntervention[]
+  invoiceItems        InvoiceItem[]
+  nursingDiagnoses    VisitNursingDiagnosis[]
+  nursingInterventions VisitNursingIntervention[]
+  photos              VisitPhoto[]
+
+  @@index([patientId])
+  @@index([nurseId])
+  @@index([scheduledDate])
+  @@map("visits")
+}
+
+model VisitRecord {
+  id                  String   @id @default(cuid())
+  visitId             String   @unique
+  bloodPressure       String?
+  glucoseLevel        String?
+  temperature          String?
+  heartRate            String?
+  respiratoryRate      Int?
+  oxygenSaturation     Int?
+  painScale            Int?
+  weight               Decimal? @db.Decimal(5, 2)
+  height               Decimal? @db.Decimal(5, 2)
+  proceduresPerformed String?
+  observations        String?
+  signedByName        String
+  signedAt            DateTime @default(now())
+
+  visit Visit @relation(fields: [visitId], references: [id], onDelete: Cascade)
+
+  @@map("visit_records")
+}
+
+// Catálogo de diagnósticos e intervenções de enfermagem (terminologia clínica,
+// distinta do catálogo de faturação). Gerido pela administração.
+
+model NursingDiagnosis {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  visitUsages VisitNursingDiagnosis[]
+
+  @@map("nursing_diagnoses")
+}
+
+model NursingIntervention {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  visitUsages VisitNursingIntervention[]
+
+  @@map("nursing_interventions")
+}
+
+model VisitNursingDiagnosis {
+  id                 String  @id @default(cuid())
+  visitId            String
+  nursingDiagnosisId String
+  notes              String?
+
+  visit            Visit            @relation(fields: [visitId], references: [id], onDelete: Cascade)
+  nursingDiagnosis NursingDiagnosis @relation(fields: [nursingDiagnosisId], references: [id])
+
+  @@unique([visitId, nursingDiagnosisId])
+  @@map("visit_nursing_diagnoses")
+}
+
+model VisitNursingIntervention {
+  id                    String  @id @default(cuid())
+  visitId               String
+  nursingInterventionId String
+  notes                 String?
+
+  visit               Visit               @relation(fields: [visitId], references: [id], onDelete: Cascade)
+  nursingIntervention NursingIntervention @relation(fields: [nursingInterventionId], references: [id])
+
+  @@unique([visitId, nursingInterventionId])
+  @@map("visit_nursing_interventions")
+}
+
+model VisitPhoto {
+  id        String   @id @default(cuid())
+  visitId   String
+  data      Bytes
+  mimeType  String
+  caption   String?
+  createdAt DateTime @default(now())
+
+  visit Visit @relation(fields: [visitId], references: [id], onDelete: Cascade)
+
+  @@map("visit_photos")
+}
+
+// Catálogo administrado pela gestão: o que a empresa faz e o que cada
+// intervenção normalmente consome, para pré-preencher o registo do enfermeiro.
+
+model Material {
+  id        String   @id @default(cuid())
+  name      String
+  unit      String   @default("un")
+  unitPrice Decimal  @default(0) @db.Decimal(10, 2)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  defaultFor InterventionMaterial[]
+  usages     VisitInterventionMaterial[]
+
+  @@map("materials")
+}
+
+model InterventionType {
+  id        String   @id @default(cuid())
+  name      String
+  basePrice Decimal  @default(0) @db.Decimal(10, 2)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  defaultMaterials InterventionMaterial[]
+  visitUsages      VisitIntervention[]
+
+  @@map("intervention_types")
+}
+
+// Modelo predefinido: materiais que uma intervenção normalmente usa.
+model InterventionMaterial {
+  id                 String @id @default(cuid())
+  interventionTypeId String
+  materialId         String
+  defaultQuantity    Int    @default(1)
+
+  interventionType InterventionType @relation(fields: [interventionTypeId], references: [id], onDelete: Cascade)
+  material         Material         @relation(fields: [materialId], references: [id], onDelete: Cascade)
+
+  @@unique([interventionTypeId, materialId])
+  @@map("intervention_materials")
+}
+
+// Intervenção realmente planeada/realizada numa visita concreta.
+model VisitIntervention {
+  id                 String   @id @default(cuid())
+  visitId            String
+  interventionTypeId String
+  priceAtTime        Decimal  @db.Decimal(10, 2)
+  createdAt          DateTime @default(now())
+
+  visit            Visit                       @relation(fields: [visitId], references: [id], onDelete: Cascade)
+  interventionType InterventionType            @relation(fields: [interventionTypeId], references: [id])
+  materials        VisitInterventionMaterial[]
+
+  @@index([visitId])
+  @@map("visit_interventions")
+}
+
+// Material realmente usado numa intervenção concreta (editável pelo
+// enfermeiro a partir do modelo predefinido).
+model VisitInterventionMaterial {
+  id                  String  @id @default(cuid())
+  visitInterventionId String
+  materialId          String
+  quantity            Int     @default(1)
+  unitPriceAtUse      Decimal @db.Decimal(10, 2)
+
+  visitIntervention VisitIntervention @relation(fields: [visitInterventionId], references: [id], onDelete: Cascade)
+  material          Material          @relation(fields: [materialId], references: [id])
+
+  @@map("visit_intervention_materials")
+}
+
+model Invoice {
+  id          String        @id @default(cuid())
+  sequence    Int           @default(autoincrement())
+  patientId   String
+  periodMonth Int
+  periodYear  Int
+  status      InvoiceStatus @default(PENDENTE)
+  dueDate     DateTime
+  paidDate    DateTime?
+  totalAmount Decimal       @default(0) @db.Decimal(10, 2)
+  createdAt   DateTime      @default(now())
+
+  patient Patient       @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  items   InvoiceItem[]
+
+  @@index([patientId])
+  @@map("invoices")
+}
+
+model InvoiceItem {
+  id          String  @id @default(cuid())
+  invoiceId   String
+  visitId     String?
+  description String
+  quantity    Int     @default(1)
+  unitPrice   Decimal @db.Decimal(10, 2)
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  visit   Visit?  @relation(fields: [visitId], references: [id], onDelete: SetNull)
+
+  @@map("invoice_items")
+}
