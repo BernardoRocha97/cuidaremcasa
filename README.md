@@ -47,27 +47,26 @@ Software de gestão para a empresa: planeamento de visitas, utentes, registos cl
 
    Abre [http://localhost:3000](http://localhost:3000).
 
-## Deploy no Vercel
+## Produção
 
-A base de dados local (`prisma dev`) só serve para desenvolvimento — não funciona em produção/serverless.
-Para o deploy:
+- **Código**: [github.com/BernardoRocha97/cuidaremcasa](https://github.com/BernardoRocha97/cuidaremcasa) (privado)
+- **Base de dados**: Neon Postgres (região eu-west-2). Já tem as migrações aplicadas e o catálogo semeado.
+- As credenciais de produção (`DATABASE_URL`, `AUTH_SECRET`) estão em `.env.production.local` (não commitado — usa esses valores ao configurar as variáveis de ambiente no Vercel).
 
-1. Cria um repositório no GitHub e faz push deste projeto.
-2. Em [vercel.com](https://vercel.com), importa o repositório.
-3. Na aba **Storage** do projeto Vercel, cria uma base de dados Postgres (Neon, integrado nativamente) — escolhe uma região na UE.
-4. Copia o `DATABASE_URL` gerado para as variáveis de ambiente do projeto Vercel.
-5. Gera um `AUTH_SECRET` de produção e adiciona-o também às variáveis de ambiente:
+### Ligar ao Vercel (falta fazer)
 
-   ```bash
-   npx auth secret
-   ```
+1. Em [vercel.com](https://vercel.com), importa o repositório `cuidaremcasa`.
+2. Nas variáveis de ambiente do projeto, adiciona `DATABASE_URL` e `AUTH_SECRET` (valores em `.env.production.local`).
+3. Faz deploy.
 
-6. Faz deploy. Depois do primeiro deploy, corre as migrações contra a base de dados de produção:
+### Recriar a base de produção do zero (se necessário)
 
-   ```bash
-   DATABASE_URL="<url-da-base-de-dados-de-producao>" npx prisma migrate deploy
-   DATABASE_URL="<url-da-base-de-dados-de-producao>" npx prisma db seed
-   ```
+```bash
+DATABASE_URL="<url-neon>" npx prisma migrate deploy
+DATABASE_URL="<url-neon>" PROD_ADMIN_EMAIL="<email>" PROD_ADMIN_PASSWORD="<password>" npx tsx prisma/seed-production.ts
+```
+
+Ao contrário do `prisma/seed.ts` (usado em desenvolvimento, cria contas de teste fracas), o `seed-production.ts` só cria a conta de administração indicada nas variáveis de ambiente, mais o catálogo — sem dados de teste.
 
 ## Estrutura
 

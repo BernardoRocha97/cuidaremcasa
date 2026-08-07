@@ -7,34 +7,29 @@ const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
-  const adminPassword = await bcrypt.hash("admin123", 10);
-  const nursePassword = await bcrypt.hash("enfermeiro123", 10);
+  const email = process.env.PROD_ADMIN_EMAIL;
+  const password = process.env.PROD_ADMIN_PASSWORD;
+
+  if (!email || !password) {
+    throw new Error("Define PROD_ADMIN_EMAIL e PROD_ADMIN_PASSWORD antes de correr este seed.");
+  }
+
+  const passwordHash = await bcrypt.hash(password, 10);
 
   await prisma.user.upsert({
-    where: { email: "admin@empresa.pt" },
+    where: { email },
     update: {},
     create: {
       name: "Administração",
-      email: "admin@empresa.pt",
-      passwordHash: adminPassword,
+      email,
+      passwordHash,
       role: "ADMIN",
-    },
-  });
-
-  await prisma.user.upsert({
-    where: { email: "enfermeiro@empresa.pt" },
-    update: {},
-    create: {
-      name: "Enfermeiro Teste",
-      email: "enfermeiro@empresa.pt",
-      passwordHash: nursePassword,
-      role: "ENFERMEIRO",
     },
   });
 
   const counts = await seedCatalog(prisma);
 
-  console.log("Seed concluído: admin@empresa.pt / admin123, enfermeiro@empresa.pt / enfermeiro123");
+  console.log(`Conta de administração criada: ${email}`);
   console.log(
     `Catálogo: ${counts.materialsCount} materiais, ${counts.interventionsCount} intervenções, ${counts.nursingDiagnosesCount} diagnósticos de enfermagem, ${counts.nursingInterventionsCount} intervenções de enfermagem`
   );
