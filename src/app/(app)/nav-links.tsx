@@ -10,6 +10,7 @@ import {
   UserCog,
   ClipboardList,
   BookOpen,
+  Wallet,
 } from "lucide-react";
 
 const ADMIN_LINKS = [
@@ -17,6 +18,7 @@ const ADMIN_LINKS = [
   { href: "/planeamento", label: "Planeamento", icon: CalendarDays },
   { href: "/utentes", label: "Utentes", icon: Users },
   { href: "/faturacao", label: "Faturação", icon: Receipt },
+  { href: "/financeiro", label: "Financeiro", icon: Wallet },
   { href: "/catalogo", label: "Catálogo", icon: BookOpen },
   { href: "/equipa", label: "Equipa", icon: UserCog },
 ];

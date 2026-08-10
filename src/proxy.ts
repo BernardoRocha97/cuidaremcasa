@@ -4,7 +4,7 @@ import { authConfig } from "@/auth.config";
 
 const { auth } = NextAuth(authConfig);
 
-const ADMIN_ONLY_PREFIXES = ["/utentes", "/faturacao", "/equipa", "/catalogo"];
+const ADMIN_ONLY_PREFIXES = ["/utentes", "/faturacao", "/financeiro", "/equipa", "/catalogo"];
 
 export default auth((req) => {
   const { pathname } = req.nextUrl;

@@ -95,11 +95,12 @@ export default async function UtenteDetailPage({ params }: PageProps<"/utentes/[
                 <th className="px-4 py-3 font-medium">Intervenções</th>
                 <th className="px-4 py-3 font-medium">Estado</th>
                 <th className="px-4 py-3 font-medium">Registo clínico</th>
+                <th className="px-4 py-3 font-medium"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-stone-100">
               {patient.visits.map((visit) => (
-                <tr key={visit.id}>
+                <tr key={visit.id} className="hover:bg-stone-50">
                   <td className="px-4 py-3">{formatDateTime(visit.scheduledDate)}</td>
                   <td className="px-4 py-3 text-stone-600">{visit.nurse?.name ?? "—"}</td>
                   <td className="px-4 py-3 text-stone-600">
@@ -121,11 +122,19 @@ export default async function UtenteDetailPage({ params }: PageProps<"/utentes/[
                       <span className="text-stone-400">—</span>
                     )}
                   </td>
+                  <td className="px-4 py-3">
+                    <Link
+                      href={`/utentes/${patient.id}/visitas/${visit.id}`}
+                      className="text-emerald-700 hover:underline"
+                    >
+                      Ver
+                    </Link>
+                  </td>
                 </tr>
               ))}
               {patient.visits.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-stone-400">
+                  <td colSpan={6} className="px-4 py-8 text-center text-stone-400">
                     Sem visitas registadas.
                   </td>
                 </tr>

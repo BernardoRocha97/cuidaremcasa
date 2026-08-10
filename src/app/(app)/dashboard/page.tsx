@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CalendarCheck, Users, Receipt, type LucideIcon } from "lucide-react";
+import { CalendarCheck, Users, Receipt } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { formatCurrency, formatDateTime } from "@/lib/format";
@@ -8,6 +8,7 @@ import { cardClass } from "@/components/form-styles";
 import { buttonStyles } from "@/components/button-styles";
 import Badge, { VISIT_STATUS_LABEL, VISIT_STATUS_VARIANT } from "@/components/badge";
 import PageHeader from "@/components/page-header";
+import StatCard from "@/components/stat-card";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -99,20 +100,6 @@ export default async function DashboardPage() {
       <Link href={isAdmin ? "/planeamento" : "/agenda"} className={buttonStyles.primary}>
         {isAdmin ? "Ver planeamento" : "Ver a minha agenda"}
       </Link>
-    </div>
-  );
-}
-
-function StatCard({ icon: Icon, label, value }: { icon: LucideIcon; label: string; value: string }) {
-  return (
-    <div className={`flex items-start gap-4 p-5 ${cardClass}`}>
-      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
-        <Icon size={20} />
-      </span>
-      <div>
-        <p className="text-sm text-stone-500">{label}</p>
-        <p className="mt-0.5 text-2xl font-semibold text-stone-900">{value}</p>
-      </div>
     </div>
   );
 }
