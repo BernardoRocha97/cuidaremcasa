@@ -175,20 +175,6 @@ export default function VisitReportPdfButton({ visit }: { visit: VisitReportData
       bodyText(visit.visitNotes);
     }
 
-    if (visit.signedByName) {
-      y += 2;
-      ensureSpace(8);
-      doc.setFontSize(9);
-      doc.setFont("helvetica", "normal");
-      doc.setTextColor(...STONE_TEXT);
-      doc.text(
-        `Assinado por ${visit.signedByName}${visit.signedAt ? ` em ${visit.signedAt}` : ""}`,
-        marginX,
-        y
-      );
-      y += 8;
-    }
-
     if (visit.photoIds.length > 0) {
       sectionTitle("Fotos anexadas");
       const imgSize = 55;
@@ -218,6 +204,28 @@ export default function VisitReportPdfButton({ visit }: { visit: VisitReportData
       }
       y += imgSize + gap;
     }
+
+    // Espaço para assinatura do profissional (útil se o relatório for entregue ao utente/família)
+    const signatureBlockHeight = 34;
+    ensureSpace(signatureBlockHeight);
+    y += 14;
+    const lineWidth = 75;
+    doc.setDrawColor(...DARK);
+    doc.line(marginX, y, marginX + lineWidth, y);
+    y += 5;
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(...DARK);
+    doc.text(visit.signedByName ?? visit.nurseName ?? "Enfermeiro(a) responsável", marginX, y);
+    y += 4;
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(...STONE_TEXT);
+    doc.text(
+      `Assinatura do profissional de enfermagem${visit.signedAt ? ` · ${visit.signedAt}` : ""}`,
+      marginX,
+      y
+    );
 
     const fileDate = visit.scheduledDate.replace(/[/,: ]/g, "-");
     doc.save(`relatorio-visita-${visit.patientName.replace(/\s+/g, "_")}-${fileDate}.pdf`);
