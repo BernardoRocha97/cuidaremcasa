@@ -254,42 +254,6 @@ export async function removeVisitInterventionMaterial(visitId: string, usageId: 
   revalidatePath(`/agenda/${visitId}/concluir`);
 }
 
-// Diagnósticos e intervenções de enfermagem da visita
-
-export async function addVisitNursingDiagnosis(visitId: string, formData: FormData) {
-  await assertVisitAccess(visitId);
-  const nursingDiagnosisId = formData.get("nursingDiagnosisId") as string;
-  if (!nursingDiagnosisId) return;
-  const notes = (formData.get("notes") as string) || null;
-
-  await prisma.visitNursingDiagnosis.create({ data: { visitId, nursingDiagnosisId, notes } });
-  revalidatePath(`/agenda/${visitId}/concluir`);
-}
-
-export async function removeVisitNursingDiagnosis(visitId: string, linkId: string) {
-  await assertVisitAccess(visitId);
-  await prisma.visitNursingDiagnosis.delete({ where: { id: linkId } });
-  revalidatePath(`/agenda/${visitId}/concluir`);
-}
-
-export async function addVisitNursingIntervention(visitId: string, formData: FormData) {
-  await assertVisitAccess(visitId);
-  const nursingInterventionId = formData.get("nursingInterventionId") as string;
-  if (!nursingInterventionId) return;
-  const notes = (formData.get("notes") as string) || null;
-
-  await prisma.visitNursingIntervention.create({
-    data: { visitId, nursingInterventionId, notes },
-  });
-  revalidatePath(`/agenda/${visitId}/concluir`);
-}
-
-export async function removeVisitNursingIntervention(visitId: string, linkId: string) {
-  await assertVisitAccess(visitId);
-  await prisma.visitNursingIntervention.delete({ where: { id: linkId } });
-  revalidatePath(`/agenda/${visitId}/concluir`);
-}
-
 // Fotos da visita (ex: feridas). Guardadas na base de dados; para produção
 // considerar mover para um serviço de blob storage.
 

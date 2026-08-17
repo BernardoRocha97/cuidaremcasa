@@ -36,7 +36,7 @@ async function main() {
 
   console.log("Seed concluído: admin@empresa.pt / admin123, enfermeiro@empresa.pt / enfermeiro123");
   console.log(
-    `Catálogo: ${counts.materialsCount} materiais, ${counts.interventionsCount} intervenções, ${counts.nursingDiagnosesCount} diagnósticos de enfermagem, ${counts.nursingInterventionsCount} intervenções de enfermagem`
+    `Catálogo: ${counts.materialsCount} materiais, ${counts.interventionsCount} intervenções`
   );
 }
 

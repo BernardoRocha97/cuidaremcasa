@@ -33,8 +33,6 @@ export default async function VisitaDetailPage({
         include: { interventionType: true, materials: { include: { material: true } } },
         orderBy: { createdAt: "asc" },
       },
-      nursingDiagnoses: { include: { nursingDiagnosis: true }, orderBy: { id: "asc" } },
-      nursingInterventions: { include: { nursingIntervention: true }, orderBy: { id: "asc" } },
       photos: { orderBy: { createdAt: "desc" } },
     },
   });
@@ -81,14 +79,6 @@ export default async function VisitaDetailPage({
                     quantity: m.quantity,
                     unit: m.material.unit,
                   })),
-                })),
-                nursingDiagnoses: visit.nursingDiagnoses.map((d) => ({
-                  name: d.nursingDiagnosis.name,
-                  notes: d.notes,
-                })),
-                nursingInterventions: visit.nursingInterventions.map((i) => ({
-                  name: i.nursingIntervention.name,
-                  notes: i.notes,
                 })),
                 vitals: vitalsFilled.map((f) => ({
                   label: f.label,
@@ -144,43 +134,6 @@ export default async function VisitaDetailPage({
           )}
         </div>
       </section>
-
-      {(visit.nursingDiagnoses.length > 0 || visit.nursingInterventions.length > 0) && (
-        <section className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <h2 className="mb-2 text-sm font-medium text-stone-700">Diagnósticos de enfermagem</h2>
-            <div className={cardClass}>
-              <ul className="divide-y divide-stone-100 text-sm">
-                {visit.nursingDiagnoses.map((d) => (
-                  <li key={d.id} className="px-4 py-2.5">
-                    <p className="text-stone-800">{d.nursingDiagnosis.name}</p>
-                    {d.notes && <p className="text-xs text-stone-400">{d.notes}</p>}
-                  </li>
-                ))}
-                {visit.nursingDiagnoses.length === 0 && (
-                  <li className="px-4 py-3 text-center text-stone-400">Nenhum.</li>
-                )}
-              </ul>
-            </div>
-          </div>
-          <div>
-            <h2 className="mb-2 text-sm font-medium text-stone-700">Intervenções de enfermagem</h2>
-            <div className={cardClass}>
-              <ul className="divide-y divide-stone-100 text-sm">
-                {visit.nursingInterventions.map((i) => (
-                  <li key={i.id} className="px-4 py-2.5">
-                    <p className="text-stone-800">{i.nursingIntervention.name}</p>
-                    {i.notes && <p className="text-xs text-stone-400">{i.notes}</p>}
-                  </li>
-                ))}
-                {visit.nursingInterventions.length === 0 && (
-                  <li className="px-4 py-3 text-center text-stone-400">Nenhuma.</li>
-                )}
-              </ul>
-            </div>
-          </div>
-        </section>
-      )}
 
       <section>
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-stone-500">

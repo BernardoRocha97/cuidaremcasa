@@ -89,52 +89,8 @@ export async function seedCatalog(prisma: PrismaClient) {
     }
   }
 
-  const nursingDiagnoses = [
-    { name: "Risco de queda", description: "Utente com risco aumentado de cair" },
-    { name: "Risco de úlcera de pressão", description: "Risco de lesão da pele por pressão/imobilidade" },
-    { name: "Défice de autocuidado: Higiene", description: "Incapacidade de realizar a higiene pessoal sem apoio" },
-    { name: "Défice de autocuidado: Alimentar-se", description: "Incapacidade de se alimentar sem apoio" },
-    { name: "Dor aguda", description: "" },
-    { name: "Risco de infeção", description: "" },
-    { name: "Mobilidade física comprometida", description: "" },
-    { name: "Ansiedade", description: "" },
-  ];
-
-  for (const diag of nursingDiagnoses) {
-    const existing = await prisma.nursingDiagnosis.findFirst({ where: { name: diag.name } });
-    if (!existing) {
-      await prisma.nursingDiagnosis.create({
-        data: { name: diag.name, description: diag.description || null },
-      });
-    }
-  }
-
-  const nursingInterventions = [
-    { name: "Vigiar sinais vitais", description: "" },
-    { name: "Vigiar integridade cutânea", description: "" },
-    { name: "Posicionar o utente", description: "" },
-    { name: "Ensinar sobre gestão de medicação", description: "" },
-    { name: "Cuidar de ferida", description: "" },
-    { name: "Prevenir queda", description: "" },
-    { name: "Gerir a dor", description: "" },
-    { name: "Incentivar a mobilidade", description: "" },
-  ];
-
-  for (const intervention of nursingInterventions) {
-    const existing = await prisma.nursingIntervention.findFirst({
-      where: { name: intervention.name },
-    });
-    if (!existing) {
-      await prisma.nursingIntervention.create({
-        data: { name: intervention.name, description: intervention.description || null },
-      });
-    }
-  }
-
   return {
     materialsCount: Object.keys(materials).length,
     interventionsCount: interventions.length,
-    nursingDiagnosesCount: nursingDiagnoses.length,
-    nursingInterventionsCount: nursingInterventions.length,
   };
 }

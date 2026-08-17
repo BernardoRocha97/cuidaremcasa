@@ -16,8 +16,6 @@ type VisitReportData = {
     price: number;
     materials: { name: string; quantity: number; unit: string }[];
   }[];
-  nursingDiagnoses: { name: string; notes: string | null }[];
-  nursingInterventions: { name: string; notes: string | null }[];
   vitals: { label: string; value: string }[];
   weight: string | null;
   height: string | null;
@@ -126,22 +124,6 @@ export default function VisitReportPdfButton({ visit }: { visit: VisitReportData
           y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 6;
         }
       }
-    }
-
-    if (visit.nursingDiagnoses.length > 0) {
-      sectionTitle("Diagnósticos de enfermagem");
-      for (const d of visit.nursingDiagnoses) {
-        bodyText(`• ${d.name}${d.notes ? ` — ${d.notes}` : ""}`);
-      }
-      y += 2;
-    }
-
-    if (visit.nursingInterventions.length > 0) {
-      sectionTitle("Intervenções de enfermagem");
-      for (const i of visit.nursingInterventions) {
-        bodyText(`• ${i.name}${i.notes ? ` — ${i.notes}` : ""}`);
-      }
-      y += 2;
     }
 
     if (visit.vitals.length > 0) {

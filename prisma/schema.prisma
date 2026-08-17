@@ -85,14 +85,12 @@ model Visit {
   notes         String?
   createdAt     DateTime    @default(now())
 
-  patient             Patient                     @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  nurse               User?                       @relation("NurseVisits", fields: [nurseId], references: [id], onDelete: SetNull)
-  record              VisitRecord?
-  interventions       VisitIntervention[]
-  invoiceItems        InvoiceItem[]
-  nursingDiagnoses    VisitNursingDiagnosis[]
-  nursingInterventions VisitNursingIntervention[]
-  photos              VisitPhoto[]
+  patient       Patient             @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  nurse         User?               @relation("NurseVisits", fields: [nurseId], references: [id], onDelete: SetNull)
+  record        VisitRecord?
+  interventions VisitIntervention[]
+  invoiceItems  InvoiceItem[]
+  photos        VisitPhoto[]
 
   @@index([patientId])
   @@index([nurseId])
@@ -120,59 +118,6 @@ model VisitRecord {
   visit Visit @relation(fields: [visitId], references: [id], onDelete: Cascade)
 
   @@map("visit_records")
-}
-
-// Catálogo de diagnósticos e intervenções de enfermagem (terminologia clínica,
-// distinta do catálogo de faturação). Gerido pela administração.
-
-model NursingDiagnosis {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-  active      Boolean  @default(true)
-  createdAt   DateTime @default(now())
-
-  visitUsages VisitNursingDiagnosis[]
-
-  @@map("nursing_diagnoses")
-}
-
-model NursingIntervention {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-  active      Boolean  @default(true)
-  createdAt   DateTime @default(now())
-
-  visitUsages VisitNursingIntervention[]
-
-  @@map("nursing_interventions")
-}
-
-model VisitNursingDiagnosis {
-  id                 String  @id @default(cuid())
-  visitId            String
-  nursingDiagnosisId String
-  notes              String?
-
-  visit            Visit            @relation(fields: [visitId], references: [id], onDelete: Cascade)
-  nursingDiagnosis NursingDiagnosis @relation(fields: [nursingDiagnosisId], references: [id])
-
-  @@unique([visitId, nursingDiagnosisId])
-  @@map("visit_nursing_diagnoses")
-}
-
-model VisitNursingIntervention {
-  id                    String  @id @default(cuid())
-  visitId               String
-  nursingInterventionId String
-  notes                 String?
-
-  visit               Visit               @relation(fields: [visitId], references: [id], onDelete: Cascade)
-  nursingIntervention NursingIntervention @relation(fields: [nursingInterventionId], references: [id])
-
-  @@unique([visitId, nursingInterventionId])
-  @@map("visit_nursing_interventions")
 }
 
 model VisitPhoto {

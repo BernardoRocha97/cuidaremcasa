@@ -12,17 +12,12 @@ import {
   addVisitInterventionMaterial,
   updateVisitInterventionMaterialQty,
   removeVisitInterventionMaterial,
-  addVisitNursingDiagnosis,
-  removeVisitNursingDiagnosis,
-  addVisitNursingIntervention,
-  removeVisitNursingIntervention,
   addVisitPhoto,
   removeVisitPhoto,
 } from "../../../planeamento/actions";
 import { inputClass, labelClass, cardClass } from "@/components/form-styles";
 import { buttonStyles } from "@/components/button-styles";
 import PageHeader from "@/components/page-header";
-import NursingItemsSection from "./nursing-items-section";
 import PhotosSection from "./photos-section";
 
 export default async function ConcluirVisitaPage({
@@ -40,8 +35,6 @@ export default async function ConcluirVisitaPage({
         include: { interventionType: true, materials: { include: { material: true } } },
         orderBy: { createdAt: "asc" },
       },
-      nursingDiagnoses: { include: { nursingDiagnosis: true }, orderBy: { id: "asc" } },
-      nursingInterventions: { include: { nursingIntervention: true }, orderBy: { id: "asc" } },
       photos: { orderBy: { createdAt: "desc" } },
     },
   });
@@ -51,27 +44,14 @@ export default async function ConcluirVisitaPage({
     notFound();
   }
 
-  const [allMaterials, allInterventionTypes, allNursingDiagnoses, allNursingInterventions] =
-    await Promise.all([
-      prisma.material.findMany({ where: { active: true }, orderBy: { name: "asc" } }),
-      prisma.interventionType.findMany({ where: { active: true }, orderBy: { name: "asc" } }),
-      prisma.nursingDiagnosis.findMany({ where: { active: true }, orderBy: { name: "asc" } }),
-      prisma.nursingIntervention.findMany({ where: { active: true }, orderBy: { name: "asc" } }),
-    ]);
+  const [allMaterials, allInterventionTypes] = await Promise.all([
+    prisma.material.findMany({ where: { active: true }, orderBy: { name: "asc" } }),
+    prisma.interventionType.findMany({ where: { active: true }, orderBy: { name: "asc" } }),
+  ]);
 
   const usedInterventionTypeIds = new Set(visit.interventions.map((i) => i.interventionTypeId));
   const availableInterventionTypes = allInterventionTypes.filter(
     (t) => !usedInterventionTypeIds.has(t.id)
-  );
-
-  const usedDiagnosisIds = new Set(visit.nursingDiagnoses.map((d) => d.nursingDiagnosisId));
-  const availableDiagnoses = allNursingDiagnoses.filter((d) => !usedDiagnosisIds.has(d.id));
-
-  const usedNursingInterventionIds = new Set(
-    visit.nursingInterventions.map((i) => i.nursingInterventionId)
-  );
-  const availableNursingInterventions = allNursingInterventions.filter(
-    (i) => !usedNursingInterventionIds.has(i.id)
   );
 
   const weight = visit.record?.weight ? Number(visit.record.weight) : null;
@@ -81,8 +61,6 @@ export default async function ConcluirVisitaPage({
   const completeVisitAction = completeVisit.bind(null, visit.id);
   const saveVisitRecordAction = saveVisitRecord.bind(null, visit.id);
   const addInterventionAction = addVisitInterventionAction.bind(null, visit.id);
-  const addNursingDiagnosisAction = addVisitNursingDiagnosis.bind(null, visit.id);
-  const addNursingInterventionAction = addVisitNursingIntervention.bind(null, visit.id);
   const addPhotoAction = addVisitPhoto.bind(null, visit.id);
   const removePhotoAction = removeVisitPhoto.bind(null, visit.id);
 
@@ -258,40 +236,6 @@ export default async function ConcluirVisitaPage({
             </button>
           </form>
         )}
-      </section>
-
-      <section className="space-y-4">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-stone-500">
-          Diagnósticos e intervenções de enfermagem
-        </h2>
-        <NursingItemsSection
-          title="Diagnósticos de enfermagem"
-          items={visit.nursingDiagnoses.map((d) => ({
-            linkId: d.id,
-            name: d.nursingDiagnosis.name,
-            notes: d.notes,
-          }))}
-          availableOptions={availableDiagnoses}
-          selectFieldName="nursingDiagnosisId"
-          addAction={addNursingDiagnosisAction}
-          removeAction={removeVisitNursingDiagnosis.bind(null, visit.id)}
-          emptyLabel="Nenhum diagnóstico registado."
-          addLabel="Adicionar diagnóstico"
-        />
-        <NursingItemsSection
-          title="Intervenções de enfermagem"
-          items={visit.nursingInterventions.map((i) => ({
-            linkId: i.id,
-            name: i.nursingIntervention.name,
-            notes: i.notes,
-          }))}
-          availableOptions={availableNursingInterventions}
-          selectFieldName="nursingInterventionId"
-          addAction={addNursingInterventionAction}
-          removeAction={removeVisitNursingIntervention.bind(null, visit.id)}
-          emptyLabel="Nenhuma intervenção de enfermagem registada."
-          addLabel="Adicionar intervenção"
-        />
       </section>
 
       <section>

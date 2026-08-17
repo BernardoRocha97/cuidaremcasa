@@ -31,7 +31,7 @@ async function main() {
 
   console.log(`Conta de administração criada: ${email}`);
   console.log(
-    `Catálogo: ${counts.materialsCount} materiais, ${counts.interventionsCount} intervenções, ${counts.nursingDiagnosesCount} diagnósticos de enfermagem, ${counts.nursingInterventionsCount} intervenções de enfermagem`
+    `Catálogo: ${counts.materialsCount} materiais, ${counts.interventionsCount} intervenções`
   );
 }
 
