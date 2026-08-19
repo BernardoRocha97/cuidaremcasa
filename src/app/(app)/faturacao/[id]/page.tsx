@@ -3,7 +3,7 @@ import { Plus, HeartHandshake } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { formatCurrency, formatDate, MONTH_NAMES } from "@/lib/format";
 import { COMPANY } from "@/lib/company";
-import { addInvoiceItem, markInvoicePaid } from "../actions";
+import { addInvoiceItem, markInvoicePaid, deleteInvoice } from "../actions";
 import InvoicePdfButton from "./invoice-pdf-button";
 import { inputClass, labelClass, cardClass } from "@/components/form-styles";
 import { buttonStyles } from "@/components/button-styles";
@@ -27,6 +27,7 @@ export default async function FaturaDetailPage({ params }: PageProps<"/faturacao
   const billingAddress = invoice.patient.billingAddress || invoice.patient.address;
   const addItemAction = addInvoiceItem.bind(null, invoice.id);
   const markPaidAction = markInvoicePaid.bind(null, invoice.id);
+  const deleteInvoiceAction = deleteInvoice.bind(null, invoice.id);
 
   return (
     <div className="max-w-3xl space-y-6">
@@ -57,11 +58,18 @@ export default async function FaturaDetailPage({ params }: PageProps<"/faturacao
               }}
             />
             {invoice.status !== "PAGA" && (
-              <form action={markPaidAction}>
-                <button type="submit" className={buttonStyles.primary}>
-                  Marcar paga
-                </button>
-              </form>
+              <>
+                <form action={markPaidAction}>
+                  <button type="submit" className={buttonStyles.primary}>
+                    Marcar paga
+                  </button>
+                </form>
+                <form action={deleteInvoiceAction}>
+                  <button type="submit" className={buttonStyles.danger}>
+                    Eliminar
+                  </button>
+                </form>
+              </>
             )}
           </div>
         }
